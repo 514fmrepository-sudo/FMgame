@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 [̲̅$̲̅(̲̅ ͡° ͜ʖ ͡°̲̅)̲̅$̲̅] FM Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .game-container {
+            max-width: 900px;
+            width: 95%;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00cc6a);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .score-timer {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .question-card {
+            background: white;
+            color: #333;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .module-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .module-1 { background: #ff6b6b; }
+        .module-2 { background: #4ecdc4; }
+        .module-3 { background: #ffe66d; color: #333; }
+        .module-4 { background: #a8e6cf; color: #333; }
+        .module-5 { background: #667eea; }
+
+        .answers-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .answers-grid.true-false {
+            grid-template-columns: 1fr 1fr;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        .answer-btn {
+            padding: 20px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .answer-a { background: linear-gradient(135deg, #ff6b6b, #ee5a52); }
+        .answer-b { background: linear-gradient(135deg, #4ecdc4, #44a08d); }
+        .answer-c { background: linear-gradient(135deg, #ffe66d, #ffcc02); color: #333; }
+        .answer-d { background: linear-gradient(135deg, #a8e6cf, #7fcdcd); color: #333; }
+
+        .answer-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .answer-btn:active {
+            transform: translateY(0);
+        }
+
+        .answer-btn.correct {
+            background: linear-gradient(135deg, #00ff88, #00cc6a) !important;
+            animation: correctPulse 0.6s ease;
+            color: white !important;
+        }
+
+        .answer-btn.incorrect {
+            background: linear-gradient(135deg, #ff4757, #c44569) !important;
+            animation: shake 0.6s ease;
+            color: white !important;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback.correct {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00cc6a;
+            border: 2px solid #00cc6a;
+        }
+
+        .feedback.incorrect {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+            border: 2px solid #ff4757;
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            display: none;
+            transition: all 0.3s ease;
+        }
+
+        .next-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .start-screen, .results-screen, .mode-select-screen {
+            background: white;
+            color: #333;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .start-btn, .restart-btn, .mode-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 25px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .mode-btn {
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            margin: 5px;
+            min-width: 200px;
+        }
+
+        .mode-btn.mini-game {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+        }
+
+        .mode-btn.comprehensive {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+        }
+
+        .start-btn:hover, .restart-btn:hover, .mode-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .result-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .timer {
+            font-size: 2rem;
+            color: #ff6b6b;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .streak {
+            background: #ff6b6b;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 10px;
+            animation: bounce 0.5s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .achievement {
+            background: #ffd700;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin: 10px;
+            display: inline-block;
+            font-weight: bold;
+            animation: glow 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 10px #ffd700; }
+            to { box-shadow: 0 0 20px #ffd700, 0 0 30px #ffd700; }
+        }
+
+        .module-select-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .module-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .module-card.module-1 { border-color: #ff6b6b; }
+        .module-card.module-2 { border-color: #4ecdc4; }
+        .module-card.module-3 { border-color: #ffe66d; }
+        .module-card.module-4 { border-color: #a8e6cf; }
+        .module-card.module-5 { border-color: #667eea; }
+
+        .module-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.4rem;
+        }
+
+        .module-card p {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .module-card .question-count {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        @media (max-width: 600px) {
+            .answers-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .score-timer {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .question-text {
+                font-size: 1.1rem;
+            }
+
+            .module-select-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Main Menu Screen -->
+        <div id="mainMenu" class="start-screen">
+            <h1>🎮 [̲̅$̲̅(̲̅ ͡° ͜ʖ ͡°̲̅)̲̅$̲̅] FM Game</h1>
+            <h2 style="color: #667eea; margin: 20px 0;">༼ ºل͟º ༼ ºل͟º ༼ ༼ʘ̚ل͜ʘ̚༽ ༽ ºل͟º ༽ ºل͟º ༽</h2>
+            <p style="font-size: 1.2rem; margin: 20px 0;">Choose your training path, FMer!( ✧≖ ͜ʖ≖)</p>
+            
+            <div style="margin: 40px 0;">
+                <button class="mode-btn comprehensive" onclick="showComprehensiveMode()">
+                    ༼ಢ_ಢ༽Comprehensive Challenge
+                    <div style="font-size: 0.9rem; margin-top: 5px; opacity: 0.8;">Mock Exam • All Modules • 50 Questions</div>
+                </button>
+                <br>
+                <button class="mode-btn mini-game" onclick="showModuleSelect()">
+                    ಠ_ಥ Module Mini-Games
+                    <div style="font-size: 0.9rem; margin-top: 5px; opacity: 0.8;">10-15 Questions • Focused Practice • Quick Reviews</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Comprehensive Mode Start Screen -->
+        <div id="comprehensiveStart" class="start-screen" style="display: none;">
+            <button class="back-btn" onclick="showMainMenu()">⬅ Back to Main Menu</button>
+            <h1>🎮 [̲̅$̲̅(̲̅ ͡° ͜ʖ ͡°̲̅)̲̅$̲̅] FM Game</h1>
+            <h2 style="color: #667eea; margin: 20px 0;">༼ಢ_ಢ༽COMPREHENSIVE MODE</h2>
+            <p style="font-size: 1.2rem; margin: 20px 0;">Ready for the ultimate 5-Lvl challenge?(ง ͠° ͟ل͜ ͡°)ง</p>
+            <div style="margin: 30px 0;">
+                <h3>(◑ ○◐)Comprehensive Mode Features(◐o ◑):</h3>
+                <ul style="text-align: left; margin: 20px 0; list-style: none;">
+                    <li>⚡ (ノಠ益ಠ)ノ彡┻━┻ 50 Questions</li>
+                    <li>🏆 Advanced Score Tracking & Achievements</li>
+                    <li>📊 Detailed Module-by-Module Analysisლ(ಠ益ಠლ)</li>
+                    <li>🎨 Instant Visual Feedback</li>
+                    <li>⏱️ 30-Second Time Challenges</li>
+                    <li>🔥 Streak Bonuses & Milestones</li>
+                </ul>
+                <div style="background: #f0f0f0; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <h4 style="color: #667eea;">📚╭( ๐_๐)╮Question Distribution:</h4>
+                    <p><strong>Module 1:</strong> Military Pay & Allowances (12 questions)</p>
+                    <p><strong>Module 2:</strong> Foundations of Combat Comptroller (8 questions)</p>
+                    <p><strong>Module 3:</strong> Military Pay Processing (12 questions)</p>
+                    <p><strong>Module 4:</strong> Civilian Support (8 questions)</p>
+                    <p><strong>Module 5:</strong> Quality Assurance Program (10 questions)</p>
+                </div>
+            </div>
+            <button class="start-btn" onclick="startGame('comprehensive')">🚀 Start Comprehensive Challenge</button>
+        </div>
+
+        <!-- Module Selection Screen -->
+        <div id="moduleSelect" class="mode-select-screen" style="display: none;">
+            <button class="back-btn" onclick="showMainMenu()">⬅ Back to Main Menu</button>
+            <h1>ಠ_ಥ Module Mini-Games</h1>
+            <h2 style="color: #667eea; margin: 20px 0;">Choose Your Focus Area</h2>
+            <p style="margin: 20px 0;">Select a module for targeted practice with 10-15 focused questions</p>
+            
+            <div class="module-select-grid">
+                <div class="module-card module-1" onclick="startGame('module1')">
+                    <h3>Module 1: Military Pay & Allowances</h3>
+                    <p>Master the MMPA, basic pay calculations, voucher balancing, and entitlements</p>
+                    <div class="question-count">15 Questions • FIDs • Basic Pay • DJMS</div>
+                </div>
+                
+                <div class="module-card module-2" onclick="startGame('module2')">
+                    <h3>Module 2: Combat Comptroller Foundations</h3>
+                    <p>Fiscal law fundamentals, PTA principles, and Anti-Deficiency Act requirements</p>
+                    <div class="question-count">12 Questions • PTA • ADA • Fiscal Law</div>
+                </div>
+                
+                <div class="module-card module-3" onclick="startGame('module3')">
+                    <h3>Module 3: Military Pay Processing</h3>
+                    <p>FMWF procedures, document scanning, TPP-E operations, and workflow management</p>
+                    <div class="question-count">15 Questions • FMWF • Scanning • TPP-E</div>
+                </div>
+                
+                <div class="module-card module-4" onclick="startGame('module4')">
+                    <h3>Module 4: Civilian Support</h3>
+                    <p>DCPS operations, MyPay functionality, civilian deductions, and customer service</p>
+                    <div class="question-count">12 Questions • DCPS • MyPay • Deductions</div>
+                </div>
+                
+                <div class="module-card module-5" onclick="startGame('module5')">
+                    <h3>Module 5: Quality Assurance Program</h3>
+                    <p>QAM responsibilities, fraud prevention, FIAR requirements, and audit procedures</p>
+                    <div class="question-count">15 Questions • QAM • FIAR • Audits</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" style="display: none;">
+            <div class="header">
+                <button class="back-btn" onclick="endGameEarly()" style="float: left;">⬅ Exit Game</button>
+                <h1 id="gameTitle">🎮 [̲̅$̲̅(̲̅ ͡° ͜ʖ ͡°̲̅)̲̅$̲̅] Challenge</h1>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar"></div>
+                </div>
+            </div>
+
+            <div class="score-timer">
+                <div>
+                    <span>🏆 Score: <span id="score">0</span>/<span id="totalQuestions">100</span></span>
+                    <span id="streak" class="streak" style="display: none;">🔥 Streak: <span id="streakCount">0</span></span>
+                    <span id="achievement" class="achievement" style="display: none;"></span>
+                </div>
+                <div class="timer" id="timer">30</div>
+            </div>
+
+            <div class="question-card">
+                <div class="module-badge" id="moduleBadge">Module 1</div>
+                <div class="question-number" id="questionNumber">Question 1 of 100</div>
+                <div class="question-text" id="questionText">Loading question...</div>
+                
+                <div class="answers-grid" id="answersGrid">
+                    <button class="answer-btn answer-a" onclick="selectAnswer(0)">A) Option A</button>
+                    <button class="answer-btn answer-b" onclick="selectAnswer(1)">B) Option B</button>
+                    <button class="answer-btn answer-c" onclick="selectAnswer(2)">C) Option C</button>
+                    <button class="answer-btn answer-d" onclick="selectAnswer(3)">D) Option D</button>
+                </div>
+
+                <div class="feedback" id="feedback"></div>
+                <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next Question ➡️</button>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="resultsScreen" class="results-screen" style="display: none;">
+            <h1 id="resultsTitle">🎉 Challenge Complete!</h1>
+            <div class="results-grid">
+                <div class="result-card">
+                    <h3>📊 Final Score</h3>
+                    <p style="font-size: 2rem; color: #667eea; font-weight: bold;" id="finalScore">0/100</p>
+                </div>
+                <div class="result-card">
+                    <h3>🎯 Accuracy</h3>
+                    <p style="font-size: 2rem; color: #667eea; font-weight: bold;" id="accuracy">0%</p>
+                </div>
+                <div class="result-card">
+                    <h3>🔥 Best Streak</h3>
+                    <p style="font-size: 2rem; color: #667eea; font-weight: bold;" id="bestStreak">0</p>
+                </div>
+                <div class="result-card">
+                    <h3>📈 [̲̅$̲̅(̲̅ ͡° ͜ʖ ͡°̲̅)̲̅$̲̅] Grade</h3>
+                    <p style="font-size: 2rem; color: #667eea; font-weight: bold;" id="grade">F</p>
+                </div>
+            </div>
+            <div id="achievementsList"></div>
+            <div id="moduleBreakdown"></div>
+            <button class="restart-btn" onclick="restartGame()">🔄 Back to Main Menu</button>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let currentQuestion = 0;
+        let score = 0;
+        let streak = 0;
+        let bestStreak = 0;
+        let timeLeft = 30;
+        let timer;
+        let answered = false;
+        let achievements = [];
+        let moduleScores = {1: {correct: 0, total: 0}, 2: {correct: 0, total: 0}, 3: {correct: 0, total: 0}, 4: {correct: 0, total: 0}, 5: {correct: 0, total: 0}};
+        let currentGameMode = '';
+        let currentQuestions = [];
+
+        // Question Banks - Comprehensive Mock Exam (50 Questions)
+        const comprehensiveQuestions = [
+            // Module 1: Military Pay and Allowances (12 questions)
+            {module: 1, question: "What command do you type to access an active duty member's MMPA in DJMS?", answers: ["PRAA", "JJAA", "CICS", "MMPA"], correct: 1},
+            {module: 1, question: "Which FID is used to view a member's basic pay line in the MMPA?", answers: ["FID 35", "FID 40", "FID 01", "FID 68"], correct: 2},
+            {module: 1, question: "Which FID is used for Basic Allowance for Housing (BAH)?", answers: ["FID 01", "FID 35", "FID 40", "FID 43"], correct: 1},
+            {module: 1, question: "Which FID is used for Basic Allowance for Subsistence (BAS)?", answers: ["FID 35", "FID 01", "FID 40", "FID 68"], correct: 2},
+            {module: 1, question: "Military pay entitlements are calculated using a 30-day month regardless of the actual number of days in that month.", answers: ["True", "False"], correct: 0, trueFalse: true},
+            {module: 1, question: "Promotions are effective on which day of the promotion month unless otherwise specified?", answers: ["Last day", "15th day", "First day", "Any day specified"], correct: 2},
+            {module: 1, question: "The MMPA contains current entitlements, deductions, payments, leave balances, collections, and how many months' history?", answers: ["6 months", "11 months", "12 months", "24 months"], correct: 1},
+            {module: 1, question: "What does MMPA stand for?", answers: ["Military Member Pay Authorization", "Master Military Pay Account", "Monthly Military Pay Assessment", "Member Military Personnel Account"], correct: 1},
+            {module: 1, question: "Voucher balancing for projects 510 applies to which personnel?", answers: ["Enlisted", "Officers", "Civilians", "Contractors"], correct: 1},
+            {module: 1, question: "Voucher balancing for projects 530 applies to which personnel?", answers: ["Officers", "Enlisted", "Reserves", "Active duty"], correct: 1},
+            {module: 1, question: "What does OOB stand for in voucher balancing?", answers: ["Out of Budget", "Out of Balance", "Office of Business", "Operations Base Office"], correct: 1},
+            {module: 1, question: "The MMPA is what type of module?", answers: ["Edit only", "View only", "Update only", "Administrative only"], correct: 1},
+
+            // Module 2: Foundations of the Combat Comptroller (8 questions)
+            {module: 2, question: "What do the letters 'PTA' stand for in fiscal law?", answers: ["Purpose, Time, and Authority", "Purpose, Time, and Amount", "Process, Time, and Amount", "Purpose, Type, and Amount"], correct: 1},
+            {module: 2, question: "Every transaction within a finance office is ultimately traced back to what?", answers: ["Military regulations", "Fiscal law", "DoD directives", "Air Force instructions"], correct: 1},
+            {module: 2, question: "Title 31 USC 1341 prohibits obligating or expending in what or in what of the appropriation?", answers: ["Advance or excess", "Error or excess", "Advance or error", "Deficit or excess"], correct: 0},
+            {module: 2, question: "Title 31 USC 1342 prohibits accepting what type of services for the United States?", answers: ["Contract", "Temporary", "Voluntary", "Emergency"], correct: 2},
+            {module: 2, question: "What does ADA stand for?", answers: ["Administrative Deficiency Act", "Anti-Deficiency Act", "Appropriation Deficiency Act", "Audit Deficiency Act"], correct: 1},
+            {module: 2, question: "How many USC sections make up the main part of the ADA?", answers: ["Two", "Three", "Four", "Five"], correct: 1},
+            {module: 2, question: "All three USC sections fall under which Title?", answers: ["Title 10", "Title 31", "Title 32", "Title 5"], correct: 1},
+            {module: 2, question: "Congress controls the use of appropriations by what two elements?", answers: ["Purpose and Time", "Time and Amount", "Purpose and Amount", "Authority and Time"], correct: 0},
+
+            // Module 3: Military Pay Processing (12 questions)
+            {module: 3, question: "What are the two methods available for scanning documents into FMWF?", answers: ["Manual Module or Automatic Module", "Scan Module or Batch Manager Module", "Upload Module or Download Module", "Single Module or Multiple Module"], correct: 1},
+            {module: 3, question: "Which scanning method is recommended for FMWF?", answers: ["Batch Manager Module", "Manual Module", "Scan Module", "Upload Module"], correct: 2},
+            {module: 3, question: "You must generate what type of barcode cover sheet for each document set?", answers: ["UNIQUE", "STANDARD", "NEW", "ORIGINAL"], correct: 0},
+            {module: 3, question: "When you scan documents to the TPP-E, the barcode cover sheets must be what? Photocopies or scanned images will not work properly.", answers: ["Certified", "Originals", "Validated", "Authenticated"], correct: 1},
+            {module: 3, question: "What does TPP-E stand for?", answers: ["Travel Pay Processing - Electronic", "Travel Personnel Processing - Electronic", "Transportation Pay Processing - Electronic", "Travel Processing Program - Electronic"], correct: 0},
+            {module: 3, question: "What does FMWF stand for?", answers: ["Financial Management Work Flow", "Financial Management Web Folder", "Finance Management Work File", "Financial Military Web Folder"], correct: 0},
+            {module: 3, question: "Management notices are system what requiring action?", answers: ["Errors", "Warnings", "Messages", "Alerts"], correct: 1},
+            {module: 3, question: "Rejects are what type of transactions requiring correction?", answers: ["Incomplete", "Invalid", "Failed", "Denied"], correct: 2},
+            {module: 3, question: "To open the Scan Module, you go to Start > All Programs > what > Scan?", answers: ["Kofax Capture 8.0", "DJMS Scan 8.0", "FMWF Capture 8.0", "Document Scan 8.0"], correct: 0},
+            {module: 3, question: "When you close the batch, the voucher will be sent to what for processing?", answers: ["DJMS", "FMWF", "TPP-E", "DFAS"], correct: 2},
+            {module: 3, question: "Place the documents with the barcode facing what direction and position the documents with the large black lines pointing into the scanner?", answers: ["Down", "Left", "Right", "Up"], correct: 3},
+            {module: 3, question: "Your user ID will automatically generate; you will use your what or Kofax password to log in?", answers: ["PIN", "CAC", "ID", "Badge"], correct: 1},
+
+            // Module 4: Civilian Support (8 questions)
+            {module: 4, question: "What are the three main self-service functions available to civilian employees in MyPay?", answers: ["Pay inquiry, leave request, travel vouchers", "Change of address, deductions, direct deposit", "Time reporting, overtime, training records", "Benefits, retirement, insurance"], correct: 1},
+            {module: 4, question: "What does DCPS stand for?", answers: ["Defense Civilian Pay Service", "Defense Civilian Personnel System", "Defense Civilian Pay System", "Department Civilian Pay System"], correct: 2},
+            {module: 4, question: "Mandatory payroll deductions withheld from a DoD employee's pay must be based on a particular provision of what or what order?", answers: ["Regulation or court", "Law or court", "Policy or legal", "Directive or judicial"], correct: 1},
+            {module: 4, question: "Voluntary deductions are made at the employee's what and require written authorization from the employee?", answers: ["Option", "Choice", "Request", "Decision"], correct: 2},
+            {module: 4, question: "What does CSR stand for?", answers: ["Customer Service Representative", "Civilian Service Representative", "Customer Support Representative", "Client Service Representative"], correct: 0},
+            {module: 4, question: "What does CPO stand for?", answers: ["Civilian Personnel Office", "Civilian Payroll Office", "Customer Personnel Office", "Central Payroll Office"], correct: 1},
+            {module: 4, question: "The launch of what has allowed for many self-service features for civilian employees?", answers: ["DCPS", "DJMS", "MyPay", "DFAS Online"], correct: 2},
+            {module: 4, question: "Voluntary deductions can consist of what two types of insurance?", answers: ["Auto and home", "Life and disability", "Health and life", "Medical and dental"], correct: 3},
+
+            // Module 5: Quality Assurance Program (10 questions)
+            {module: 5, question: "The highest priority in the QA program is what prevention and detection?", answers: ["Error", "Fraud", "Waste", "Abuse"], correct: 1},
+            {module: 5, question: "What does QAM stand for?", answers: ["Quality Assessment Manager", "Quality Assurance Manager", "Quality Audit Manager", "Quality Analysis Manager"], correct: 1},
+            {module: 5, question: "The QAM reviews at least how many randomly selected pay-affected documents quarterly?", answers: ["30", "45", "60", "75"], correct: 1},
+            {module: 5, question: "What does DTS stand for?", answers: ["Defense Transportation System", "Defense Travel System", "Defense Transaction System", "Defense Training System"], correct: 1},
+            {module: 5, question: "The QAM reviews documents to ensure that primary and supporting documentation was what two things?", answers: ["Complete and accurate", "Proper and valid", "Current and certified", "Signed and dated"], correct: 1},
+            {module: 5, question: "What does FIAR stand for?", answers: ["Financial Improvements and Audit Readiness", "Financial Integrity and Audit Review", "Federal Improvements and Audit Readiness", "Financial Inspection and Audit Requirements"], correct: 0},
+            {module: 5, question: "What does QAR stand for?", answers: ["Quality Assurance Report", "Quality Assessment Review", "Quality Assurance Review", "Quality Audit Report"], correct: 2},
+            {module: 5, question: "OMB Circular what number serves as a critical guide for management's responsibility for internal control within Federal agencies?", answers: ["A-123", "A-124", "A-125", "A-126"], correct: 0},
+            {module: 5, question: "What does MICP stand for?", answers: ["Management Internal Control Program", "Managers' Internal Control Program", "Military Internal Control Program", "Management Integrated Control Program"], correct: 1},
+            {module: 5, question: "The QAM submits the QAR to whom for their review and action?", answers: ["Unit commander", "Financial services officer", "Quality assurance chief", "Finance officer"], correct: 1}
+        ];
+
+        // Module-specific question banks (filtered from comprehensive)
+        const moduleQuestions = {
+            module1: comprehensiveQuestions.filter(q => q.module === 1).slice(0, 15),
+            module2: comprehensiveQuestions.filter(q => q.module === 2).slice(0, 12),
+            module3: comprehensiveQuestions.filter(q => q.module === 3).slice(0, 15),
+            module4: comprehensiveQuestions.filter(q => q.module === 4).slice(0, 12),
+            module5: comprehensiveQuestions.filter(q => q.module === 5).slice(0, 15)
+        };
+
+        function showMainMenu() {
+            document.getElementById('mainMenu').style.display = 'block';
+            document.getElementById('comprehensiveStart').style.display = 'none';
+            document.getElementById('moduleSelect').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('resultsScreen').style.display = 'none';
+        }
+
+        function showComprehensiveMode() {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('comprehensiveStart').style.display = 'block';
+        }
+
+        function showModuleSelect() {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('moduleSelect').style.display = 'block';
+        }
+
+        function startGame(mode) {
+            currentGameMode = mode;
+            currentQuestion = 0;
+            score = 0;
+            streak = 0;
+            bestStreak = 0;
+            achievements = [];
+            moduleScores = {1: {correct: 0, total: 0}, 2: {correct: 0, total: 0}, 3: {correct: 0, total: 0}, 4: {correct: 0, total: 0}, 5: {correct: 0, total: 0}};
+
+            if (mode === 'comprehensive') {
+                currentQuestions = comprehensiveQuestions;
+                document.getElementById('gameTitle').textContent = '🎮 [̲̅$̲̅(̲̅ ͡° ͜ʖ ͡°̲̅)̲̅$̲̅] Comprehensive Challenge';
+            } else {
+                currentQuestions = moduleQuestions[mode];
+                const moduleNames = {
+                    module1: 'Module 1: Military Pay & Allowances',
+                    module2: 'Module 2: Combat Comptroller Foundations',
+                    module3: 'Module 3: Military Pay Processing',
+                    module4: 'Module 4: Civilian Support',
+                    module5: 'Module 5: Quality Assurance Program'
+                };
+                document.getElementById('gameTitle').textContent = `ಠ_ಥ ${moduleNames[mode]} Mini-Game`;
+            }
+
+            document.getElementById('totalQuestions').textContent = currentQuestions.length;
+            document.getElementById('comprehensiveStart').style.display = 'none';
+            document.getElementById('moduleSelect').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            
+            loadQuestion();
+            startTimer();
+        }
+
+        function endGameEarly() {
+            clearInterval(timer);
+            showMainMenu();
+        }
+
+        function loadQuestion() {
+            if (currentQuestion >= currentQuestions.length) {
+                endGame();
+                return;
+            }
+
+            const q = currentQuestions[currentQuestion];
+            answered = false;
+            timeLeft = 30;
+
+            // Update UI
+            document.getElementById('questionNumber').textContent = `Question ${currentQuestion + 1} of ${currentQuestions.length}`;
+            const moduleBadge = document.getElementById('moduleBadge');
+            moduleBadge.textContent = `Module ${q.module}`;
+            moduleBadge.className = `module-badge module-${q.module}`;
+            document.getElementById('questionText').textContent = q.question;
+            document.getElementById('progressBar').style.width = `${((currentQuestion) / currentQuestions.length) * 100}%`;
+
+            // Update answers
+            const answersGrid = document.getElementById('answersGrid');
+            const answerBtns = document.querySelectorAll('.answer-btn');
+            
+            if (q.trueFalse) {
+                answersGrid.className = 'answers-grid true-false';
+                answerBtns[0].textContent = 'True';
+                answerBtns[1].textContent = 'False';
+                answerBtns[0].style.display = 'flex';
+                answerBtns[1].style.display = 'flex';
+                answerBtns[2].style.display = 'none';
+                answerBtns[3].style.display = 'none';
+            } else {
+                answersGrid.className = 'answers-grid';
+                answerBtns.forEach((btn, index) => {
+                    btn.textContent = q.answers[index] ? `${String.fromCharCode(65 + index)}) ${q.answers[index]}` : '';
+                    btn.style.display = q.answers[index] ? 'flex' : 'none';
+                });
+            }
+
+            answerBtns.forEach(btn => {
+                btn.className = btn.className.replace(' correct incorrect', '');
+                btn.disabled = false;
+            });
+
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+        }
+
+        function selectAnswer(index) {
+            if (answered) return;
+            
+            answered = true;
+            clearInterval(timer);
+            
+            const q = currentQuestions[currentQuestion];
+            const answerBtns = document.querySelectorAll('.answer-btn');
+            const feedback = document.getElementById('feedback');
+            
+            // Update module tracking
+            moduleScores[q.module].total++;
+            
+            if (index === q.correct) {
+                // Correct answer
+                score++;
+                streak++;
+                bestStreak = Math.max(bestStreak, streak);
+                moduleScores[q.module].correct++;
+                
+                answerBtns[index].classList.add('correct');
+                feedback.textContent = `🎉 Correct! ${q.trueFalse ? (q.correct === 0 ? 'True' : 'False') : q.answers[q.correct]} is right!`;
+                feedback.className = 'feedback correct';
+                
+                // Show streak and check for achievements
+                if (streak > 1) {
+                    document.getElementById('streakCount').textContent = streak;
+                    document.getElementById('streak').style.display = 'inline-block';
+                }
+                
+                checkAchievements();
+            } else {
+                // Wrong answer
+                streak = 0;
+                document.getElementById('streak').style.display = 'none';
+                
+                answerBtns[index].classList.add('incorrect');
+                answerBtns[q.correct].classList.add('correct');
+                feedback.textContent = `❌ Incorrect. The correct answer is ${q.trueFalse ? (q.correct === 0 ? 'True' : 'False') : q.answers[q.correct]}`;
+                feedback.className = 'feedback incorrect';
+            }
+            
+            feedback.style.display = 'block';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            document.getElementById('score').textContent = score;
+            
+            // Disable all buttons
+            answerBtns.forEach(btn => btn.disabled = true);
+        }
+
+        function checkAchievements() {
+            const achievement = document.getElementById('achievement');
+            let newAchievement = '';
+            
+            if (streak === 5 && !achievements.includes('first-streak')) {
+                newAchievement = '🔥 Hot Streak!';
+                achievements.push('first-streak');
+            } else if (streak === 10 && !achievements.includes('double-digit')) {
+                newAchievement = '💯 Double Digits!';
+                achievements.push('double-digit');
+            } else if (score === Math.floor(currentQuestions.length * 0.25) && !achievements.includes('quarter-mark')) {
+                newAchievement = '🎯 Quarter Mark!';
+                achievements.push('quarter-mark');
+            } else if (score === Math.floor(currentQuestions.length * 0.5) && !achievements.includes('halfway')) {
+                newAchievement = '⭐ Halfway Hero!';
+                achievements.push('halfway');
+            } else if (score === Math.floor(currentQuestions.length * 0.75) && !achievements.includes('three-quarters')) {
+                newAchievement = '🚀 Almost There!';
+                achievements.push('three-quarters');
+            }
+            
+            if (newAchievement) {
+                achievement.textContent = newAchievement;
+                achievement.style.display = 'inline-block';
+                setTimeout(() => {
+                    achievement.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            loadQuestion();
+            if (currentQuestion < currentQuestions.length) {
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            timeLeft = 30;
+            document.getElementById('timer').textContent = timeLeft;
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    if (!answered) {
+                        // Time's up - treat as wrong answer
+                        const q = currentQuestions[currentQuestion];
+                        moduleScores[q.module].total++;
+                        streak = 0;
+                        document.getElementById('streak').style.display = 'none';
+                        
+                        const feedback = document.getElementById('feedback');
+                        feedback.textContent = `⏰ Time's up! The correct answer was ${q.trueFalse ? (q.correct === 0 ? 'True' : 'False') : q.answers[q.correct]}`;
+                        feedback.className = 'feedback incorrect';
+                        feedback.style.display = 'block';
+                        
+                        document.getElementById('nextBtn').style.display = 'inline-block';
+                        answered = true;
+                        
+                        // Show correct answer
+                        const answerBtns = document.querySelectorAll('.answer-btn');
+                        answerBtns[q.correct].classList.add('correct');
+                        answerBtns.forEach(btn => btn.disabled = true);
+                    }
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            clearInterval(timer);
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('resultsScreen').style.display = 'block';
+            
+            // Calculate results
+            const accuracy = Math.round((score / currentQuestions.length) * 100);
+            let grade = 'F';
+            if (accuracy >= 90) grade = 'A';
+            else if (accuracy >= 80) grade = 'B';
+            else if (accuracy >= 70) grade = 'C';
+            else if (accuracy >= 60) grade = 'D';
+            
+            // Update results title
+            const resultsTitle = document.getElementById('resultsTitle');
+            if (currentGameMode === 'comprehensive') {
+                resultsTitle.textContent = '🎉 Comprehensive Challenge Complete!';
+            } else {
+                resultsTitle.textContent = '🎉 Module Mini-Game Complete!';
+            }
+            
+            // Update results
+            document.getElementById('finalScore').textContent = `${score}/${currentQuestions.length}`;
+            document.getElementById('accuracy').textContent = `${accuracy}%`;
+            document.getElementById('bestStreak').textContent = bestStreak;
+            document.getElementById('grade').textContent = grade;
+            
+            // Achievements summary
+            let achievementsList = '<h3 style="margin-top: 30px;">🏆 Achievements Unlocked:</h3><div>';
+            if (achievements.length === 0) {
+                achievementsList += '<p>No achievements unlocked this time. Try again!</p>';
+            } else {
+                achievements.forEach(achievement => {
+                    switch(achievement) {
+                        case 'first-streak': achievementsList += '<span class="achievement">🔥 Hot Streak!</span>'; break;
+                        case 'double-digit': achievementsList += '<span class="achievement">💯 Double Digits!</span>'; break;
+                        case 'quarter-mark': achievementsList += '<span class="achievement">🎯 Quarter Mark!</span>'; break;
+                        case 'halfway': achievementsList += '<span class="achievement">⭐ Halfway Hero!</span>'; break;
+                        case 'three-quarters': achievementsList += '<span class="achievement">🚀 Almost There!</span>'; break;
+                    }
+                });
+            }
+            achievementsList += '</div>';
+            document.getElementById('achievementsList').innerHTML = achievementsList;
+            
+            // Module breakdown (only show for comprehensive mode)
+            let breakdown = '';
+            if (currentGameMode === 'comprehensive') {
+                breakdown = '<h3 style="margin-top: 30px;">📚 Module Performance Analysis:</h3><div class="results-grid">';
+                const moduleNames = {
+                    1: 'Military Pay & Allowances',
+                    2: 'Combat Comptroller Foundations', 
+                    3: 'Military Pay Processing',
+                    4: 'Civilian Support',
+                    5: 'Quality Assurance Program'
+                };
+                
+                for (let i = 1; i <= 5; i++) {
+                    const moduleScore = moduleScores[i];
+                    const moduleAccuracy = moduleScore.total > 0 ? Math.round((moduleScore.correct / moduleScore.total) * 100) : 0;
+                    let moduleGrade = 'F';
+                    if (moduleAccuracy >= 90) moduleGrade = 'A';
+                    else if (moduleAccuracy >= 80) moduleGrade = 'B';
+                    else if (moduleAccuracy >= 70) moduleGrade = 'C';
+                    else if (moduleAccuracy >= 60) moduleGrade = 'D';
+                    
+                    breakdown += `
+                        <div class="result-card">
+                            <h4>Module ${i}</h4>
+                            <p style="font-size: 0.9rem; margin-bottom: 10px;">${moduleNames[i]}</p>
+                            <p style="font-size: 1.5rem; color: #667eea; font-weight: bold;">${moduleScore.correct}/${moduleScore.total}</p>
+                            <p style="color: #667eea; font-weight: bold;">${moduleAccuracy}% (${moduleGrade})</p>
+                        </div>
+                    `;
+                }
+                breakdown += '</div>';
+            }
+            document.getElementById('moduleBreakdown').innerHTML = breakdown;
+        }
+
+        function restartGame() {
+            showMainMenu();
+        }
+
+        // Initialize the game
+        showMainMenu();
+    </script>
+</body>
+</html>

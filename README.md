@@ -19,7 +19,7 @@ Clone the repository:
 git clone https://github.com/yourusername/your-repo-name.git
 Navigate to the project directory:
 cd your-repo-name
-Open index.html in your web browser
+Open gamified_2modes.html in your web browser
 
 ✨ Features
 Two Game Modes:
